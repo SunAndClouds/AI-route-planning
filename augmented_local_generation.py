@@ -6,7 +6,8 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+api_key = os.environ.get("GROQ_API_KEY") # "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"
+client = Groq(api_key=api_key) 
 
 def ipynb_to_markdown_string(input_file):
     with open(input_file, 'r', encoding='utf-8') as f:
@@ -54,5 +55,4 @@ def run_conversion(path, model):
     return result
 
 if __name__ == "__main__":
-    path = "exploratory data analysis.ipynb"
-    run_conversion(path, model="llama-3.1-70b-versatile")
+    run_conversion(path="Visualization.ipynb", model="llama-3.1-70b-versatile")
