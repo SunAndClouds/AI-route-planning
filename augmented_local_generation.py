@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-api_key = os.environ.get("GROQ_API_KEY") # "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"
+api_key = os.environ.get("GROQ_API_KEY")
 client = Groq(api_key=api_key) 
 
 def ipynb_to_markdown_string(input_file):
@@ -33,26 +33,42 @@ def process_markdown(markdown):
 
 def convert_and_process_with_llm(path, model):
     markdown_content = ipynb_to_markdown_string(path)
-    response = client.chat.completions.create(
-        messages=[
-            {
-                "role": "user",
-                "content": markdown_content
-            }
-        ],
-        model=model,
-        temperature=0.5,
-        max_tokens=4096,
-        stream=False,  # Changed to False for simplicity
-    )
+    
+    try:
+        response = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": markdown_content
+                }
+            ],
+            model=model,
+            temperature=0.5,
+            max_tokens=4096,
+            stream=False,
+        )
+        return response.choices[0].message.content, markdown_content
+    except Exception as e:
+        print(f"LLM processing failed: {str(e)}")
+        return None, markdown_content
 
-    return response.choices[0].message.content
+def run_conversion(path, model, fallback_to_markdown=True):
+    llm_result, markdown_content = convert_and_process_with_llm(path, model)
+    
+    # If LLM processing failed and fallback is enabled, copy markdown content
+    if llm_result is None and fallback_to_markdown:
+        # Copy markdown content to clipboard by default
+        pyperclip.copy(markdown_content)
+        print("Falling back to markdown content")
 
-
-def run_conversion(path, model):
-    result = convert_and_process_with_llm(path, model)
-    pyperclip.copy(result)
-    return result
+    else:
+        # If LLM processing succeeded, copy the LLM response
+        pyperclip.copy(llm_result)
+        print("Successfully copied the content")
 
 if __name__ == "__main__":
-    run_conversion(path="Visualization.ipynb", model="llama-3.1-70b-versatile")
+    result = run_conversion(
+        path="Visualization.ipynb", 
+        model="llama-3.1-70b-versatile",
+        fallback_to_markdown=True  # Set to False if you don't want fallback
+    )
