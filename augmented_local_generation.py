@@ -68,7 +68,7 @@ def run_conversion(path, model, fallback_to_markdown=True):
 
 if __name__ == "__main__":
     result = run_conversion(
-        path="Visualization.ipynb", 
+        path="agentic workflow.ipynb", 
         model="llama-3.1-70b-versatile",
         fallback_to_markdown=True  # Set to False if you don't want fallback
     )
